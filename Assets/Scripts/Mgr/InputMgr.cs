@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace nara
 {
-    public class InputMgr : MonoBehaviour
+    public class InputMgr
     {
         public Action KeyAction = null;
 
@@ -16,6 +16,7 @@ namespace nara
             {
                 KeyAction.Invoke();
             }
+            
         }
     }
 

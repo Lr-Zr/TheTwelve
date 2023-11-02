@@ -27,7 +27,9 @@ namespace nara
 
         void Update()
         {
+
             _Input.OnUpdate();
+
         }
 
         static void Init()
@@ -35,7 +37,7 @@ namespace nara
             if(_Ins == null )
             {
                 GameObject gameobject = GameObject.Find("@GameMgr");
-                if(gameobject != null )
+                if(gameobject == null )
                 {
                     gameobject = new GameObject { name = "@GameMgr" };//오브젝트 생성
                     gameobject.AddComponent<GameMgr>();
