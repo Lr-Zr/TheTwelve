@@ -32,6 +32,7 @@ namespace nara
 
         }
 
+
         static void Init()
         {
             if(_Ins == null )
