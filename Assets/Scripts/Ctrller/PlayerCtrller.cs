@@ -5,6 +5,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using Unity.VisualScripting;
+using UnityEngine.Playables;
 
 namespace nara
 {
@@ -46,7 +47,12 @@ namespace nara
         {
             Idle,
             Running,
+            Jumping,
+            DoudbleJumping,
+            Falling,
             Floating,
+            Die,
+            Attack,
 
         }
         void Start()
@@ -58,31 +64,24 @@ namespace nara
             GameMgr.Input.KeyAction -= OnKeyboard;
             GameMgr.Input.KeyAction += OnKeyboard;
 
-
         }
 
         private void FixedUpdate()
         {
             //달리다가 멈추는 조건
-            if (_StopTime > 0.02 && _State == PlayerState.Running)
-            {
-                // _Rigid.AddForce(this.transform.forward * _MoveSpeed, ForceMode.Impulse);
-                _Anim.SetBool("Running", false);
-                _State = PlayerState.Idle;
-                Debug.Log("dd");
-            }
-
             _StopTime += Time.deltaTime;
         }
         void Update()
         {
-
+            Debug.Log(_State);
+            CheckFloor();
             //달리다가 멈추면 미끄러짐
             if (_StopTime < 0.3 && _State == PlayerState.Idle)
             {
                 _Rigid.AddForce(this.transform.forward * _SlideSpeed);
                 Debug.Log("ttt");
             }
+
         }
 
         void OnKeyboard()
@@ -111,11 +110,17 @@ namespace nara
 
             if (Input.GetKey(KeyCode.Space))//점프
             {
-                if (_State != PlayerState.Floating)
+                if (_State == PlayerState.Idle)
                 {
-                    _Rigid.AddForce(Vector3.up * _JumpingPower, ForceMode.Impulse);
-                    _State = PlayerState.Floating;
+                    Jump();
+                    _State = PlayerState.Jumping;
                 }
+                else if (_State == PlayerState.Jumping)
+                {
+                    Jump();
+                    _State = PlayerState.DoudbleJumping;
+                }
+
             }
 
             if (Input.GetKey(KeyCode.UpArrow))//조합키 상
@@ -130,7 +135,10 @@ namespace nara
 
             if (Input.GetKey(KeyCode.LeftArrow))//좌 이동
             {
+                /*이동 및 방향전환*/
+                Move(-1);
                 /* 땅에서 달릴 때 */
+
                 if (_State == PlayerState.Idle)
                 {
                     _Anim.SetBool("Running", true);
@@ -138,11 +146,6 @@ namespace nara
                 }
                 _StopTime = 0;
 
-                /*이동 및 방향전환*/
-                this.transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.left), 1f);
-                //this.transform.position += Vector3.left * Time.deltaTime * _MoveSpeed;
-                _Rigid.velocity = _MoveSpeed * transform.forward * Time.deltaTime;
-                this.transform.position += _Rigid.velocity;
 
 
             }
@@ -158,9 +161,7 @@ namespace nara
                 _StopTime = 0;
 
                 /*이동 및 방향전환*/
-                this.transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.right), 1f);
-                _Rigid.velocity = _MoveSpeed * transform.forward * Time.deltaTime;
-                this.transform.position += _Rigid.velocity;
+                Move(1);
                 //this.transform.position += Vector3.right * Time.deltaTime * _MoveSpeed;
                 /* 
                  * 공중에서 이동, 스킬이나 공격을 위한 bool이 필요함.
@@ -180,6 +181,34 @@ namespace nara
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
             throw new System.NotImplementedException();
+        }
+
+        void Jump()
+        {
+            _Rigid.AddForce(Vector3.up * _JumpingPower, ForceMode.Impulse);
+        }
+        void Move(int dir)      /*이동 및 방향전환*/
+        {
+
+            this.transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.right * dir), 1f);
+            this.transform.position += transform.forward * _MoveSpeed * Time.deltaTime;
+
+        }
+
+        void CheckFloor()
+        {
+            RaycastHit hit;
+            Debug.DrawRay(this.transform.position, this.transform.up * -0f, Color.green);
+            LayerMask mask = LayerMask.GetMask("Floor");
+            if (Physics.Raycast(this.transform.position, this.transform.up * -1, out hit, 1f, mask))
+            {
+                if (_State != PlayerState.Idle)
+                {
+                    _Anim.SetBool("Running", false);
+                    _State = PlayerState.Idle;
+                    Debug.Log("mask");
+                }
+            }
         }
     }
 
