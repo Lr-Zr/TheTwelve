@@ -41,6 +41,7 @@ namespace nara
         PhotonView _Pv;
         Rigidbody _Rigid;
         PlayerAnimation _Anim;
+        PlayerEffect _Eff;
         PlayerState _State;
 
         //time
@@ -55,6 +56,7 @@ namespace nara
         bool _IsRunning;
         bool _Stop;
 
+        int dir;
 
         Vector3 _PrePos;
         void Start()
@@ -63,6 +65,8 @@ namespace nara
             _Pv = GetComponent<PhotonView>();
             _Rigid = GetComponent<Rigidbody>();
             _Anim = GetComponent<PlayerAnimation>();
+            _Eff= GetComponent<PlayerEffect>();
+
             GameMgr.Input.KeyAction -= OnKeyboard;
             GameMgr.Input.KeyAction += OnKeyboard;
             _IsJump = false;
@@ -120,6 +124,7 @@ namespace nara
             {
                 _State = PlayerState.Stop ;
                 _Anim.SetAnim(_State);
+                _Eff.Break(this.transform.position, dir);
             }
 
             _PrePos = transform.position;
@@ -163,6 +168,9 @@ namespace nara
                     _Anim.SetAnim(_State);
                     _Anim.SetJump(_IsJump);
                     _JumpTime = 0;
+
+                    _Eff.Jump(this.transform.position, 1);
+
                 }
                 else if (!_IsDJump && _JumpTime > 0.25)
                 {
@@ -172,9 +180,12 @@ namespace nara
                     _Anim.SetAnim(_State);
                     _Anim.SetDJump(_IsDJump);
                     _JumpTime = 0;
+
+                    _Eff.Jump(this.transform.position, 0);
                 }
 
                 _IsRunning = false;
+             
             }
 
 
@@ -195,11 +206,11 @@ namespace nara
             {
                 /*이동 및 방향전환*/
 
-                Move(-1);
                 /* 땅에서 달릴 때 */
 
                 if (_State == PlayerState.Idle|| _State ==PlayerState.Stop && !_IsJump)
                 {
+                 
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
@@ -207,8 +218,13 @@ namespace nara
 
 
                 if (!_IsJump)
+                {
+                    dir = -1;
                     _RunTime += Time.deltaTime;
+                }
+                Move(-1);
 
+                _Eff.Run(this.transform.position, dir);
             }
 
 
@@ -216,18 +232,23 @@ namespace nara
             if (Input.GetKey(KeyCode.RightArrow))//우 이동
             {
                 /*이동 및 방향전환*/
-                Move(1);
 
                 /* 땅에서 달릴 때 */
                 if (_State == PlayerState.Idle||_State == PlayerState.Stop && !_IsJump)
                 {
+                    
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
                 }
 
                 if (!_IsJump)
+                {
+                     dir = 1;
                     _RunTime += Time.deltaTime;
+                }
+                Move(1);
+                _Eff.Run(this.transform.position, dir);
 
 
 

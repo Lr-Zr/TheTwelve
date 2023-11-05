@@ -17,6 +17,8 @@ namespace nara
         InputMgr _Input = new InputMgr();
         public static InputMgr Input { get { return Instance._Input; } }
 
+        //EffectMgr _Effect = new EffectMgr();
+        //public static EffectMgr Effect { get { return Instance._Effect; } } 
 
 
         void Start()
