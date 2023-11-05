@@ -29,7 +29,10 @@ namespace nara
         {
 
             _Input.OnUpdate();
-
+        }
+        private void FixedUpdate()
+        {
+           
         }
 
 

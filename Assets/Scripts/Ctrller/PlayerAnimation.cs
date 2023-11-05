@@ -14,7 +14,7 @@ namespace nara
         }
         public void SetAnim(PlayerState State)
         {
-            Debug.Log("¹¹¾ß?");
+            
             _animator.SetInteger("State",(int) State);
         }
         public void SetJump(bool isjump)
@@ -24,6 +24,10 @@ namespace nara
         public void SetDJump(bool isDjump)
         {
             _animator.SetBool("IsDJump", isDjump);
+        }
+        public void SetRuntime(float runtime)
+        {
+            _animator.SetFloat("Runtime", runtime);
         }
     }
 
