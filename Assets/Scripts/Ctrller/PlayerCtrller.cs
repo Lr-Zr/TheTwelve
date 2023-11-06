@@ -47,7 +47,7 @@ namespace nara
         //time
         float _RunTime = 0.0f;
         float _JumpTime = 0.25f;
-        float _Floortime = 0.0f;
+        float _Floortime = 0.0f;//판정을 천천히
 
 
         bool _IsJump;
@@ -65,7 +65,7 @@ namespace nara
             _Pv = GetComponent<PhotonView>();
             _Rigid = GetComponent<Rigidbody>();
             _Anim = GetComponent<PlayerAnimation>();
-            _Eff= GetComponent<PlayerEffect>();
+            _Eff = GetComponent<PlayerEffect>();
 
             GameMgr.Input.KeyAction -= OnKeyboard;
             GameMgr.Input.KeyAction += OnKeyboard;
@@ -86,7 +86,7 @@ namespace nara
                 _RunTime = 1.001f;
                 _IsOnesec = true;
             }
-            if (_Rigid.velocity.y < -0.05f&&_IsJump)//낙하
+            if (_Rigid.velocity.y < -0.05f && _IsJump)//낙하
             {
                 _State = PlayerState.Falling;
                 _Anim.SetAnim(_State);
@@ -97,14 +97,14 @@ namespace nara
         {
 
             OnFloor();//
-            //Debug.Log(_State);
-            //Debug.Log("running"+_IsRunning);
-            //Debug.Log(_RunTime);
+                      //Debug.Log(_State);
+                      //Debug.Log("running"+_IsRunning);
+                      //Debug.Log(_RunTime);
 
             //달리다가 멈추면 미끄러짐
-       
 
-            if (_IsRunning&&_State==PlayerState.Stop)//탄성 효과
+
+            if (_IsRunning && _State == PlayerState.Stop)//탄성 효과
             {
                 _RunTime -= Time.deltaTime;
                 if (_RunTime > 0.75f)
@@ -116,20 +116,21 @@ namespace nara
                 {
                     _RunTime = 0f;
                     _IsRunning = false;
+                    _IsOnesec = false;
                 }
 
             }
 
-            if(_PrePos==transform.position&&_IsRunning)
+            if (_PrePos == transform.position && _IsRunning)
             {
-                _State = PlayerState.Stop ;
+                _State = PlayerState.Stop;
                 _Anim.SetAnim(_State);
                 _Eff.Break(this.transform.position, dir);
             }
 
             _PrePos = transform.position;
         }
-        
+
         void OnKeyboard()
         {
             //if (!_Pv.IsMine) return;
@@ -159,7 +160,7 @@ namespace nara
 
             if (Input.GetKey(KeyCode.Space))//점프
             {
-                if (!_IsJump)
+                if (!_IsJump && _State != PlayerState.Falling)
                 {
                     Jump();
                     _State = PlayerState.Jumping;
@@ -185,7 +186,7 @@ namespace nara
                 }
 
                 _IsRunning = false;
-             
+
             }
 
 
@@ -208,9 +209,9 @@ namespace nara
 
                 /* 땅에서 달릴 때 */
 
-                if (_State == PlayerState.Idle|| _State ==PlayerState.Stop && !_IsJump)
+                if (_State == PlayerState.Idle || _State == PlayerState.Stop && !_IsJump)
                 {
-                 
+
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
@@ -221,10 +222,10 @@ namespace nara
                 {
                     dir = -1;
                     _RunTime += Time.deltaTime;
+                    _Eff.Run(this.transform.position, dir);
                 }
                 Move(-1);
 
-                _Eff.Run(this.transform.position, dir);
             }
 
 
@@ -234,9 +235,9 @@ namespace nara
                 /*이동 및 방향전환*/
 
                 /* 땅에서 달릴 때 */
-                if (_State == PlayerState.Idle||_State == PlayerState.Stop && !_IsJump)
+                if (_State == PlayerState.Idle || _State == PlayerState.Stop && !_IsJump)
                 {
-                    
+
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
@@ -244,11 +245,11 @@ namespace nara
 
                 if (!_IsJump)
                 {
-                     dir = 1;
+                    dir = 1;
                     _RunTime += Time.deltaTime;
+                    _Eff.Run(this.transform.position, dir);
                 }
                 Move(1);
-                _Eff.Run(this.transform.position, dir);
 
 
 
@@ -271,17 +272,8 @@ namespace nara
 
         void Jump()
         {
-            if (!_IsJump)
-            {
-
-                _Rigid.AddForce(Vector3.up * _JumpingPower, ForceMode.Impulse);
-            }
-            else
-            {
-                _Rigid.velocity = Vector3.zero;
-                _Rigid.AddForce(Vector3.up * _JumpingPower, ForceMode.Impulse);
-
-            }
+            _Rigid.velocity = Vector3.zero;
+            _Rigid.AddForce(Vector3.up * _JumpingPower, ForceMode.Impulse);
         }
         void Move(int dir)      /*이동 및 방향전환*/
         {
@@ -309,7 +301,7 @@ namespace nara
             LayerMask mask = LayerMask.GetMask("Floor");
             if (Physics.Raycast(this.transform.position, this.transform.up * -1, out hit, 0.2f, mask))
             {
-                if (_State != PlayerState.Idle&&_JumpTime > 0.25 && _Floortime > 0.05 &&!_IsRunning)
+                if (_State != PlayerState.Idle && _JumpTime > 0.25 && _Floortime > 0.05 && !_IsRunning)
                 {
                     _Rigid.velocity = Vector3.zero;
                     _Floortime = 0.0f;
@@ -322,7 +314,7 @@ namespace nara
 
                     Debug.Log("check");
                 }
-               
+
             }
         }
     }
