@@ -9665,7 +9665,7 @@ ParticleSystem:
   m_GameObject: {fileID: 611449316258724689}
   serializedVersion: 8
   lengthInSec: 1
-  simulationSpeed: 1
+  simulationSpeed: 0.5
   stopAction: 0
   cullingMode: 3
   ringBufferMode: 0

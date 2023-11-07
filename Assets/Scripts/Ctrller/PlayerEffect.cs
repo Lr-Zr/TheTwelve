@@ -6,96 +6,28 @@ using UnityEngine;
 namespace nara
 {
 
+
     public class PlayerEffect : MonoBehaviour
     {
-        [SerializeField]
-         GameObject RRun;
-        [SerializeField]
-         GameObject LRun;
-        [SerializeField]
-         GameObject RBreak;
-        [SerializeField]
-         GameObject LBreak;
-        [SerializeField]
-         GameObject BJump;
-        [SerializeField]
-         GameObject DJump;
 
-        GameObject go;
+        [SerializeField]
+        GameObject[] _Effects;
 
-
-        //public void EffectPlay(Vector3 pos, string str, float time = 1.0f)
-        //{
-        //    if (str == "RRun")
-        //    {
-        //        go = Instantiate(RRun, pos, Quaternion.identity);
-        //    }
-        //    else if (str == "LRun")
-        //    {
-        //        go = Instantiate(LRun, pos, Quaternion.identity);
-        //    }
-        //    else if (str == "RBreak")
-        //    {
-        //        go = Instantiate(RBreak, pos, Quaternion.identity);
-        //    }
-        //    else if (str == "LBreak")
-        //    {
-        //        go = Instantiate(LBreak, pos, Quaternion.identity);
-        //    }
-        //    else if (str == "Jump")
-        //    {
-        //        go = Instantiate(BJump, pos, Quaternion.identity);
-        //    }
-        //    else if (str == "DJump")
-        //    {
-        //        go = Instantiate(DJump, pos, Quaternion.identity);
-        //    }
-        //    Destroy(go, time);
-        //}
-
-        public void Run(Vector3 pos, int dir, float time = 1.0f)
+        GameObject[] go;
+        void Start()
         {
-            pos.y += 0.3f;
-            if (dir > 0)
-            {
-
-                go = Instantiate(RRun, pos, Quaternion.identity);
-            }
-            else
-            {
-                go = Instantiate(LRun, pos, Quaternion.identity);
-            }
-            Destroy(go, time);
+            
+            go = new GameObject[(int)Effect.End];
         }
 
-        public void Break(Vector3 pos, int dir, float time = 1.0f)
+        public void EffectPlay(Vector3 pos, Effect effect, float time = 1.0f)
         {
-            pos.y += 0.3f;
-            if (dir > 0)
-            {
-                go = Instantiate(RBreak, pos, Quaternion.identity);
-            }
-            else
-            {
-                go = Instantiate(LBreak, pos, Quaternion.identity);
-            }
-            Destroy(go, time);
-        }
+            pos += _Effects[(int)effect].transform.position;
+            if (go[(int)effect]!=null) return;
+            go[(int)effect] = Instantiate(_Effects[(int)effect], pos, Quaternion.identity);
+            Destroy(go[(int)effect], time);
 
-        public void Jump(Vector3 pos, int dir, float time = 1.0f)
-        {
-            pos.y += 0.3f;
-            if (dir > 0)
-            {
-                go = Instantiate(BJump, pos, Quaternion.identity);
-            }
-            else
-            {
-                go = Instantiate(DJump, pos, Quaternion.identity);
-            }
-            Destroy(go, time);
         }
-
 
     }
 

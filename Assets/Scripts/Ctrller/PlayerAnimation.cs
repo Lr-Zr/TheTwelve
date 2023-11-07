@@ -14,7 +14,6 @@ namespace nara
         }
         public void SetAnim(PlayerState State)
         {
-            
             _animator.SetInteger("State",(int) State);
         }
         public void SetJump(bool isjump)
@@ -29,6 +28,12 @@ namespace nara
         {
             _animator.SetFloat("Runtime", runtime);
         }
+
+        public void TriggerAtk()
+        {
+            _animator.SetTrigger("Attack");
+        }
+
     }
 
 }

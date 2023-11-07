@@ -23,5 +23,18 @@ namespace nara
 
         }
 
+    public enum Effect
+    {
+        RRun,
+        LRun,
+        RBreak,
+        LBreak,
+        RJump,
+        LJump,
+        DJump,
+        Land,
+        End
+    }
+
 
 }
