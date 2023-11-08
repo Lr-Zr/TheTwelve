@@ -55,6 +55,9 @@ namespace nara
         [SerializeField]
         float _SlideTime = 0.25f;
 
+        [SerializeField]
+        float _AtkStopTime = 0.25f;
+
         //파워
         [SerializeField]
         Vector3[] _Power;
@@ -73,15 +76,19 @@ namespace nara
         //time
         float _RunTime = 0.0f;
         float _JumpTime = 0.3f;
-        float _Floortime = 0.0f;//판정을 천천히
+        float _Floortime = 0.0f;//
+        float _AttackTime = 0.5f;
+
 
         bool _IsAttack;
         bool _IsJump;
         bool _IsDJump;
-        bool _IsOnesec;
-        bool _IsDashAtk;//질주공격 좌우공격 
+        bool _IsOnesec;//질주 공격 
+        bool _IsDashAtk;
         bool _IsRunning;
         bool _Stop;
+
+
         //keydown time;
         float _KDwTime = 0.0f;
         float _KUpTime = 0.0f;
@@ -94,12 +101,12 @@ namespace nara
         Vector3 _PrePos;
         void Start()
         {
-
+            
             _Pv = GetComponent<PhotonView>();
             _Rigid = GetComponent<Rigidbody>();
             _Anim = GetComponent<PlayerAnimation>();
             _Eff = GetComponent<PlayerEffect>();
-
+            
             GameMgr.Input.KeyAction -= OnKeyboard;
             GameMgr.Input.KeyAction += OnKeyboard;
             _State = PlayerState.Idle;
@@ -118,7 +125,13 @@ namespace nara
             //달리다가 멈추는 조건
             _Floortime += Time.deltaTime;
 
-
+            //공격을 한 이후 공격 판정이 꺼지는 시간
+            _AttackTime += Time.deltaTime;
+            if (_AttackTime > _AtkStopTime)
+            {
+                _IsAttack = false;
+                _Anim.SetIsAttack(_IsAttack);
+            }
             //커맨드 키입력
             _KUpTime += Time.deltaTime;
             _KDwTime += Time.deltaTime;
@@ -162,7 +175,7 @@ namespace nara
             //Debug.Log("running"+_IsRunning);
             //Debug.Log(_RunTime);
 
-           
+
 
             //달리다가 멈추면 미끄러짐
             if (_IsRunning && _State == PlayerState.Stop)//탄성 효과
@@ -182,7 +195,7 @@ namespace nara
 
             }
             //멈출 때 이펙트------------------------------------------------------------------------
-     
+
 
             if (_PrePos == transform.position && _IsRunning)
             {
@@ -190,9 +203,9 @@ namespace nara
                 _Anim.SetAnim(_State);
 
                 if (dir > 0)
-                    _Eff.EffectPlay(this.transform.position, Effect.RBreak);
+                    _Eff.EffectPlay(Effect.RBreak);
                 else
-                    _Eff.EffectPlay(this.transform.position, Effect.LBreak);
+                    _Eff.EffectPlay(Effect.LBreak);
             }
             _PrePos = transform.position;
         }
@@ -206,6 +219,8 @@ namespace nara
                 _KUpTime = 0;
                 _IsKeyDown = false;
                 _IsKeyUp = true;
+
+
             }
 
             else if (Input.GetKey(KeyCode.DownArrow))//조합기 하 및 하강 속도 향상
@@ -227,12 +242,12 @@ namespace nara
                 if (!_IsJump)
                 {
                     _RunTime += Time.deltaTime;
-                     dir = -1;
+                    dir = -1;
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
 
-                    _Eff.EffectPlay(this.transform.position, Effect.LRun);
+                    _Eff.EffectPlay(Effect.LRun);
                 }
                 Move(-1);
 
@@ -242,32 +257,34 @@ namespace nara
 
             if (Input.GetKey(KeyCode.RightArrow))//우 이동
             {
-                /*이동 및 방향전환*/
 
                 /* 땅에서 달릴 때 */
-          
                 if (!_IsJump)
                 {
                     _IsRunning = true;
                     _State = PlayerState.Running;
                     _Anim.SetAnim(_State);
-            
+
                     dir = 1;
                     _RunTime += Time.deltaTime;
-                    _Eff.EffectPlay(this.transform.position, Effect.RRun);
+                    _Eff.EffectPlay(Effect.RRun);
                 }
+                /*이동 및 방향전환*/
                 Move(1);
 
-
-
-                /* 
-                 * 공중에서 이동, 스킬이나 공격을 위한 bool이 필요함.
-                 */
             }
+
+
+
+
 
             if (Input.GetKey(KeyCode.Q)) //공격
             {
+                _AttackTime = 0;
                 _Anim.TriggerAtk();
+
+                _IsAttack = true;
+                _Anim.SetIsAttack(_IsAttack);
             }
 
             else if (Input.GetKey(KeyCode.W))//스킬
@@ -288,7 +305,10 @@ namespace nara
 
 
 
-            if (Input.GetKey(KeyCode.Space))//점프
+
+
+            /* 점프 */
+            if (Input.GetKey(KeyCode.Space))
             {
                 _RunTime = 0;
                 if (!_IsJump && _State != PlayerState.Falling)
@@ -298,13 +318,13 @@ namespace nara
                     _IsJump = true;
 
                     _Anim.SetAnim(_State);
-                    _Anim.SetJump(_IsJump);
+                    _Anim.SetIsJump(_IsJump);
                     _JumpTime = 0;
 
                     if (dir > 0)
-                        _Eff.EffectPlay(this.transform.position, Effect.RJump);
+                        _Eff.EffectPlay(Effect.RJump);
                     else
-                        _Eff.EffectPlay(this.transform.position, Effect.LJump);
+                        _Eff.EffectPlay(Effect.LJump);
                 }
                 else if (!_IsDJump && _JumpTime > 0.25)
                 {
@@ -312,10 +332,10 @@ namespace nara
                     _State = PlayerState.DoudbleJumping;
                     _IsDJump = true;
                     _Anim.SetAnim(_State);
-                    _Anim.SetDJump(_IsDJump);
+                    _Anim.SetIsDJump(_IsDJump);
                     _JumpTime = 0;
 
-                    _Eff.EffectPlay(this.transform.position, Effect.DJump);
+                    _Eff.EffectPlay(Effect.DJump);
                 }
 
                 _IsRunning = false;
@@ -382,19 +402,20 @@ namespace nara
             LayerMask mask = LayerMask.GetMask("Floor");
             if (Physics.Raycast(this.transform.position, this.transform.up * -1, out hit, 0.2f, mask))
             {
-                if (_State != PlayerState.Idle&& _State != PlayerState.Stop && _JumpTime > _JumpRestriction && _Floortime > 0.05 && !_IsRunning)
+                if (_State != PlayerState.Idle && _JumpTime > _JumpRestriction && _Floortime > 0.05 && !_IsRunning)
                 {
                     if (_IsJump)
-                        _Eff.EffectPlay(this.transform.position, Effect.Land);
+                        _Eff.EffectPlay(Effect.Land);
                     _Rigid.velocity = Vector3.zero;
                     _Floortime = 0.0f;
+
                     _State = PlayerState.Idle;
                     _Anim.SetAnim(_State);
 
                     _IsJump = false;
                     _IsDJump = false;
-                    _Anim.SetJump(_IsJump);
-                    _Anim.SetDJump(_IsDJump);
+                    _Anim.SetIsJump(_IsJump);
+                    _Anim.SetIsDJump(_IsDJump);
 
                     Debug.Log("check");
                 }

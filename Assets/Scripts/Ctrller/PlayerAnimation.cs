@@ -16,17 +16,21 @@ namespace nara
         {
             _animator.SetInteger("State",(int) State);
         }
-        public void SetJump(bool isjump)
+        public void SetIsJump(bool isjump)
         {
             _animator.SetBool("IsJump", isjump);
         }
-        public void SetDJump(bool isDjump)
+        public void SetIsDJump(bool isDjump)
         {
             _animator.SetBool("IsDJump", isDjump);
         }
-        public void SetRuntime(float runtime)
+        public void SetIsRunning(bool isRunning)
         {
-            _animator.SetFloat("Runtime", runtime);
+            _animator.SetBool("IsRunning", isRunning);
+        }
+        public void SetIsAttack(bool isAttack)
+        {
+            _animator.SetBool("IsAttacking", isAttack);
         }
 
         public void TriggerAtk()

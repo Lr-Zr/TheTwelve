@@ -137,6 +137,11 @@ MonoBehaviour:
   _Gauge: 1
   _Life: 3
   _SlideSpeed: 100
+  _DownSpeed: 10
+  _JumpRestriction: 0.25
+  _RunRestriction: 1
+  _AttackRestriction: 0.75
+  _SlideTime: 0.5
   _Power:
   - {x: 0, y: 0, z: 0}
 --- !u!114 &1579784737
@@ -172,6 +177,16 @@ MonoBehaviour:
   - {fileID: 2959625264892343690, guid: 0fcd19cc80941fc46b57ad4135836d22, type: 3}
   - {fileID: 3430817766348608944, guid: 20f08c58a37595449a5374000a6c27e1, type: 3}
   - {fileID: 6892753433165742188, guid: 065172db0871c5a47a7cfabac36f890a, type: 3}
+  - {fileID: 6892753433165742188, guid: 065172db0871c5a47a7cfabac36f890a, type: 3}
+  _AtkEffects:
+  - {fileID: 3630683408801389860, guid: 44d8da2c330e98646bcaca1f6c97504c, type: 3}
+  - {fileID: 1119143585881920503, guid: 4f78aef28a557074a8162a55adaf1b07, type: 3}
+  - {fileID: 4196192098934428334, guid: 6767d968f0afef745b557abb205378b6, type: 3}
+  - {fileID: 365474304295561015, guid: 830b51873099e1f428468d286175f762, type: 3}
+  - {fileID: 3344759952172689703, guid: 1e139fa8aa37f504e92d0e9b4f812e5f, type: 3}
+  - {fileID: 611449316258724689, guid: 9cdc28e7e6dcdbc43882809e0c75390b, type: 3}
+  - {fileID: 2457608973815445994, guid: 6d8b7353521e5ee4eb59cc2d915f556e, type: 3}
+  - {fileID: 7468637898838875030, guid: 6436de66a6d787b449aae3b4122e1193, type: 3}
 --- !u!1001 &1706038872515542818
 PrefabInstance:
   m_ObjectHideFlags: 0
