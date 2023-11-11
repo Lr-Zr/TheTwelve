@@ -74,7 +74,7 @@ namespace nara
         //방향 좌우 move함수용
         int dir;
         //time
-        float _RunTime = 0.0f;
+        public float _RunTime = 0.0f;
         float _JumpTime = 0.3f;
         float _Floortime = 0.0f;//
         float _AttackTime = 0.5f;
@@ -101,12 +101,12 @@ namespace nara
         Vector3 _PrePos;
         void Start()
         {
-            
+
             _Pv = GetComponent<PhotonView>();
             _Rigid = GetComponent<Rigidbody>();
             _Anim = GetComponent<PlayerAnimation>();
             _Eff = GetComponent<PlayerEffect>();
-            
+
             GameMgr.Input.KeyAction -= OnKeyboard;
             GameMgr.Input.KeyAction += OnKeyboard;
             _State = PlayerState.Idle;
@@ -162,59 +162,34 @@ namespace nara
                 _State = PlayerState.Falling;
                 _Anim.SetAnim(_State);
             }
-
+            
+            
         }
         void Update()
         {
             //바닥에 있는지 체크 함수;
-            OnFloor();//
-            Debug.Log(_State);
-            Debug.Log(_IsRunning);
-            //Debug.Log("점프시간"+ _JumpTime);
-            //Debug.Log("땅지속시간"+ _Floortime);
-            //Debug.Log("running"+_IsRunning);
-            //Debug.Log(_RunTime);
+            OnFloor();
+            //브레이킹 부분
+            Breaking();
 
 
-
-            //달리다가 멈추면 미끄러짐
-            if (_IsRunning && _State == PlayerState.Stop)//탄성 효과
-            {
-                _RunTime -= Time.deltaTime;
-                if (_RunTime > _RunRestriction - _SlideTime)
-                {
-                    //Debug.Log("이동");
-                    _Rigid.AddForce(this.transform.forward * _SlideSpeed);
-                }
-                else
-                {
-                    _RunTime = 0f;
-                    _IsRunning = false;
-                    _IsOnesec = false;
-                }
-
-            }
-            //멈출 때 이펙트------------------------------------------------------------------------
-
-
-            if (_PrePos == transform.position && _IsRunning)
-            {
-                _State = PlayerState.Stop;
-                _Anim.SetAnim(_State);
-
-                if (dir > 0)
-                    _Eff.EffectPlay(Effect.RBreak);
-                else
-                    _Eff.EffectPlay(Effect.LBreak);
-            }
-            _PrePos = transform.position;
         }
 
         void OnKeyboard()
         {
             //if (!_Pv.IsMine) return;
 
-            if (Input.GetKey(KeyCode.UpArrow))//조합키 상
+            if (Input.GetKey(KeyCode.DownArrow))//조합기 하 및 하강 속도 향상
+            {
+                _IsKeyDown = true;
+                _IsKeyUp = false;
+                _KDwTime = 0;
+
+                if (_IsJump && _JumpTime > _JumpRestriction)
+                    Move(0);
+            }
+
+            else if (Input.GetKey(KeyCode.UpArrow))//조합키 상
             {
                 _KUpTime = 0;
                 _IsKeyDown = false;
@@ -223,15 +198,6 @@ namespace nara
 
             }
 
-            else if (Input.GetKey(KeyCode.DownArrow))//조합기 하 및 하강 속도 향상
-            {
-                _IsKeyDown = true;
-                _IsKeyUp = false;
-                _KDwTime = 0;
-
-                if (_IsJump)
-                    Move(0);
-            }
 
             if (Input.GetKey(KeyCode.LeftArrow))//좌 이동
             {
@@ -367,33 +333,57 @@ namespace nara
 
         void Move(int dir)      /*이동 및 방향전환*/
         {
-            if (_State != PlayerState.Stop)
-            {
 
-                if (!_IsJump)
+            if (!_IsJump)
+            {
+                if (dir == 0) return;
+                this.transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.right * dir), 1f);
+                this.transform.position += transform.forward * _MoveSpeed * Time.deltaTime;
+            }
+            else
+            {
+                if (dir == 0)
                 {
-                    if (dir == 0) return;
-                    this.transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.right * dir), 1f);
-                    this.transform.position += transform.forward * _MoveSpeed * Time.deltaTime;
+                    this.transform.position -= Vector3.up * _DownSpeed * Time.deltaTime;
+
                 }
                 else
                 {
-                    if (dir == 0)
-                    {
-                        this.transform.position -= Vector3.up * _DownSpeed * Time.deltaTime;
+                    this.transform.position += Vector3.right * dir * _MoveSpeed / 2.0f* Time.deltaTime;
 
-                    }
-                    else
-                        this.transform.position += Vector3.right * dir * _MoveSpeed * Time.deltaTime;
                 }
-
             }
+
         }
 
 
 
 
+        void Breaking()
+        {
+            //달리다가 멈추면 미끄러짐
+            if (_IsRunning&&_IsOnesec)//탄성 효과
+            {
+                _RunTime -= Time.deltaTime;
+                if (_RunTime > _RunRestriction - _SlideTime)
+                {
+                    //Debug.Log("이동");
+                    _Rigid.AddForce(this.transform.forward * _SlideSpeed);
+                }
+                else
+                {
+                    _RunTime = 0f;
+                    _IsRunning = false;
+                    _IsOnesec = false;
+                    if (dir > 0)
+                        _Eff.EffectPlay(Effect.RBreak);
+                    else
+                        _Eff.EffectPlay(Effect.LBreak);
+                }
 
+            }
+            _PrePos = transform.position;
+        }
 
         void OnFloor()
         {
@@ -402,7 +392,7 @@ namespace nara
             LayerMask mask = LayerMask.GetMask("Floor");
             if (Physics.Raycast(this.transform.position, this.transform.up * -1, out hit, 0.2f, mask))
             {
-                if (_State != PlayerState.Idle && _JumpTime > _JumpRestriction && _Floortime > 0.05 && !_IsRunning)
+                if (_State != PlayerState.Idle && _JumpTime > _JumpRestriction && _Floortime > 0.05)
                 {
                     if (_IsJump)
                         _Eff.EffectPlay(Effect.Land);
@@ -418,6 +408,7 @@ namespace nara
                     _Anim.SetIsDJump(_IsDJump);
 
                     Debug.Log("check");
+                   
                 }
 
             }

@@ -19,7 +19,6 @@ namespace nara
             Attack,//7
             KnockOut,//8
             Stun,//9
-            Stop,//10
 
         }
 
